@@ -5,6 +5,7 @@ using System.Data.Entity;
 using System.Data.Entity.Core.Mapping;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
+using System.Data.Entity.Infrastructure.Interception;
 using System.Data.Entity.Validation;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
@@ -20,7 +21,11 @@ namespace EntityFramework.Extension
     public class BaseDbContext : DbContext
     {
         #region ctor
-        protected BaseDbContext(): this("DefaultConnection")
+        static BaseDbContext()
+        {
+        }
+
+        protected BaseDbContext() : this("DefaultConnection")
         {
 
         }
@@ -49,6 +54,7 @@ namespace EntityFramework.Extension
         }
         #endregion
 
+        #region Thread
         /// <summary>
         /// 线程级 缓存 数据库
         /// </summary>
@@ -65,46 +71,62 @@ namespace EntityFramework.Extension
             }
             return db;
         }
+        #endregion
 
-        /// <summary>
-        /// 保存
-        /// </summary>
-        /// <returns></returns>
-        public override int SaveChanges()
-        {
-            ApplyConcepts();
-            return base.SaveChanges();
-        }
-
-        private void ApplyConcepts()
+        #region HandleState
+        protected virtual void ApplyConcepts()
         {
             foreach (DbEntityEntry entry in this.ChangeTracker.Entries())
             {
                 switch (entry.State)
                 {
                     case EntityState.Added:
-                        SetCreationAuditProperties(entry);
+                        HandleAdd(entry);
                         continue;
                     case EntityState.Deleted:
-                        HandleSoftDelete(entry);
+                        HandleDelete(entry);
                         continue;
                     case EntityState.Modified:
-                        SetModificationAuditProperties(entry);
+                        HandleModify(entry);
                         if (entry.Entity is ISoftDelete && (entry.Entity as ISoftDelete).IsDeleted)
                         {
-                            HandleSoftDelete(entry);
+                            HandleDelete(entry);
                         }
                         continue;
                     default:
-                        HandleSelect();
+                        HandleSelect(entry);
+                        LogManager.GetLogger(GetType()).Debug(entry);
                         continue;
                 }
             }
         }
 
-        private void HandleSelect()
+        protected virtual void HandleSelect(DbEntityEntry entry)
         {
-            throw new NotImplementedException();
+            HandleState.Select(entry);
+        }
+
+        protected virtual void HandleAdd(DbEntityEntry entry)
+        {
+            HandleState.Add(entry);
+        }
+
+        protected virtual void HandleDelete(DbEntityEntry entry)
+        {
+            HandleState.Delete(entry);
+        }
+
+        protected virtual void HandleModify(DbEntityEntry entry)
+        {
+            HandleState.Modify(entry);
+        }
+        #endregion
+
+        #region SaveChanges
+        public override int SaveChanges()
+        {
+            ApplyConcepts();
+            return base.SaveChanges();
         }
 
         public override Task<int> SaveChangesAsync()
@@ -120,6 +142,7 @@ namespace EntityFramework.Extension
                 throw;
             }
         }
+
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         {
             try
@@ -133,56 +156,53 @@ namespace EntityFramework.Extension
                 throw;
             }
         }
+        #endregion
 
+        #region MasterSlave
+        /// <summary>
+        /// 主从复制
+        /// </summary>
+        /// <param name="slavedbConn"></param>
+        protected static void MasterSlave(string slavedbConn)
+        {
+            DbInterception.Add(new DbMasterSlaveCommandInterceptor(slavedbConn));
+        }
+        #endregion
+
+        #region NoLockFunc
+        /// <summary>
+        /// 事务期间读取 和 修改 可变数据
+        /// 主要用于nolock读取
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public T NoLockFunc<T>(Func<T> func)
+        {
+            var transactionOptions = new System.Transactions.TransactionOptions
+            {
+                IsolationLevel = System.Transactions.IsolationLevel.ReadUncommitted
+            };
+            using (new System.Transactions.TransactionScope(System.Transactions.TransactionScopeOption.Required, transactionOptions))
+            {
+                try
+                {
+                    return func();
+                }
+                catch (Exception ex)
+                {
+                    LogManager.GetLogger(GetType()).Error(ex);
+                    throw;
+                }
+            }
+        }
+        #endregion
+
+        #region Log
         protected virtual void LogDbEntityValidationException(DbEntityValidationException exception)
         {
             LogManager.GetLogger(GetType()).Error(exception);
         }
-
-        protected virtual string GetUserId()
-        {
-            var claimsPrincipal = Thread.CurrentPrincipal as ClaimsPrincipal;
-            if (claimsPrincipal == null)
-                return null;
-            var claimsIdentity = claimsPrincipal.Identity as ClaimsIdentity;
-            if (claimsIdentity == null)
-                return null;
-            return claimsIdentity.GetUserId();
-        }
-
-
-        private void SetModificationAuditProperties(DbEntityEntry entry)
-        {
-            if (entry.Entity is IModificationAudited)
-            {
-                var entity = entry.Entity as IModificationAudited;
-                entity.LastModificationTime = DateTime.Now;
-                entity.LastModifierUserId = GetUserId();
-            }
-        }
-        private void HandleSoftDelete(DbEntityEntry entry)
-        {
-            if (entry.Entity is ISoftDelete)
-            {
-                entry.State = EntityState.Unchanged;
-                var entity = entry.Entity as ISoftDelete;
-                entity.IsDeleted = true;
-                if (entry.Entity is IDeletionAudited)
-                {
-                    var deletionEntity = entry.Entity as IDeletionAudited;
-                    deletionEntity.DeletionTime = DateTime.Now;
-                    deletionEntity.DeleterUserId = GetUserId();
-                }
-            }
-        }
-        private void SetCreationAuditProperties(DbEntityEntry entry)
-        {
-            if (entry.Entity is ICreatorEntity)
-            {
-                var entity = entry.Entity as ICreatorEntity;
-                entity.CreateTime = DateTime.Now;
-                entity.CreatorId = GetUserId();
-            }
-        }
+        #endregion
     }
 }

@@ -11,13 +11,15 @@ namespace EntityFramework.Extension.Tests
     {
         static DemoDbContext()
         {
+            MasterSlave("Data Source=(localdb)\\test;Initial Catalog=Demo;Integrated Security=True;");
             GenerateViews(new DemoDbContext());
         }
 
-        public DemoDbContext():base()
-        {
-            
-        }
+        /// <summary>
+        /// 当前线程DbContext
+        /// </summary>
+        public static DemoDbContext CurrentDb => CurrentDbContext<DemoDbContext>();
+
 
         public IDbSet<User> Users{ get; set; }
     }

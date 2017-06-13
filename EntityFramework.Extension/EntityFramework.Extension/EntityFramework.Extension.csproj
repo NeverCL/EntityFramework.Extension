@@ -53,6 +53,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -62,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseDbContext.cs" />
+    <Compile Include="DbMasterSlaveCommandInterceptor.cs" />
     <Compile Include="EntityFrameworkConfig.cs" />
     <Compile Include="HandleState.cs" />
     <Compile Include="ICreatorEntity.cs" />
