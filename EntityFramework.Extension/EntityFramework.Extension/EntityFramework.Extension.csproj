@@ -62,7 +62,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseDbContext.cs" />
+    <Compile Include="DbContext\BaseDbContext.cs" />
     <Compile Include="DbContext\DbContextHelper.cs" />
     <Compile Include="Entity\AuditionEntity.cs" />
     <Compile Include="Entity\IAuditionEntity.cs" />
