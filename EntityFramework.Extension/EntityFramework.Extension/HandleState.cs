@@ -52,7 +52,7 @@ namespace EntityFramework.Extension
             }
         }
 
-        public static void Select(DbEntityEntry entry)
+        public static void Default(DbEntityEntry entry)
         {
             
         }

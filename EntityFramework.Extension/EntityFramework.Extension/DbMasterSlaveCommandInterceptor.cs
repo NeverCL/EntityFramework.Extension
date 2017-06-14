@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Data.Entity.Infrastructure.Interception;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using Common.Logging;
@@ -12,11 +14,10 @@ namespace EntityFramework.Extension
     public class DbMasterSlaveCommandInterceptor : DbCommandInterceptor
     {
         const string TYPENAME = "DbMasterSlaveCommandInterceptor";
-        private string _slavedbConn;
 
-        public DbMasterSlaveCommandInterceptor(string slavedbConn)
+        public DbMasterSlaveCommandInterceptor()
         {
-            _slavedbConn = slavedbConn;
+            LogManager.GetLogger(TYPENAME).Debug("DbMasterSlaveCommandInterceptor()");
         }
 
         //private string GetReadDbConnection()
@@ -34,16 +35,47 @@ namespace EntityFramework.Extension
         /// <param name="interceptionContext"></param>
         public override void ReaderExecuting(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
         {
-            if (!command.CommandText.StartsWith("insert",StringComparison.CurrentCultureIgnoreCase) && command.Transaction == null && _slavedbConn != null)
+            if (EntityFrameworkConfig.IsSlaveRead && !command.CommandText.StartsWith("insert", StringComparison.CurrentCultureIgnoreCase) && command.Transaction == null)
             {
-                command.Connection.Close();
-                command.Connection.ConnectionString = _slavedbConn;
-                command.Connection.Open();
+                ChangeReadConn(command.Connection);
             }
             LogManager.GetLogger(TYPENAME).Debug(command.CommandText);
             base.ReaderExecuting(command, interceptionContext);
         }
 
+        /// <summary>
+        /// 修改读链接
+        /// </summary>
+        /// <param name="commandConnection"></param>
+        private void ChangeReadConn(DbConnection commandConnection)
+        {
+            lock ("IsThreadSlave")
+            {
+                commandConnection.Close();
+                commandConnection.ConnectionString = EntityFrameworkConfig.ReadConnstr;
+                commandConnection.Open();
+                #region Thread Connection 
+                //if (EntityFrameworkConfig.IsThreadSlave && slaveDbConnection != null && !string.IsNullOrEmpty(slaveDbConnection.ConnectionString))
+                //{
+                //    if (slaveDbConnection.State == ConnectionState.Closed)
+                //    {
+                //        slaveDbConnection.Open();
+                //    }
+                //    commandConnection = slaveDbConnection;
+                //}
+                //else
+                //{
+                //    commandConnection.Close();
+                //    commandConnection.ConnectionString = EntityFrameworkConfig.ReadConnstr;
+                //    commandConnection.Open();
+                //    if (EntityFrameworkConfig.IsThreadSlave && slaveDbConnection == null)
+                //    {
+                //        slaveDbConnection = commandConnection;
+                //    }
+                //} 
+                #endregion
+            }
+        }
 
         /// <summary>
         /// Linq 生成的update,delete + Database.ExecuteSqlCommand

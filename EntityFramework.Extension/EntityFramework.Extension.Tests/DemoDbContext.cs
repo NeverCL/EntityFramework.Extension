@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data.Entity;
 
 namespace EntityFramework.Extension.Tests
 {
@@ -11,17 +6,15 @@ namespace EntityFramework.Extension.Tests
     {
         static DemoDbContext()
         {
-            MasterSlave("Data Source=(localdb)\\test;Initial Catalog=Demo;Integrated Security=True;");
             GenerateViews(new DemoDbContext());
         }
 
         /// <summary>
         /// 当前线程DbContext
         /// </summary>
-        public static DemoDbContext CurrentDb => CurrentDbContext<DemoDbContext>();
+        public static DemoDbContext CurrentDb => DbContextHelper.CurrentDbContext<DemoDbContext>();
 
-
-        public IDbSet<User> Users{ get; set; }
+        public IDbSet<User> Users { get; set; }
     }
 
     public class User

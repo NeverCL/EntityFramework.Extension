@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Entity;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -12,17 +10,18 @@ namespace EntityFramework.Extension.Tests
     {
         public BaseContextTests()
         {
-            //InitData();
+            InitData();
         }
 
         public void InitData()
         {
-            var db = new DemoDbContext();
-            db.Users.Add(new User
-            {
-                Name = "name"
-            });
-            db.SaveChanges();
+            //var db = new DemoDbContext();
+            //db.Users.Add(new User
+            //{
+            //    Name = "name"
+            //});
+            //db.SaveChanges();
+            var db = DemoDbContext.CurrentDb.Users.ToList();
         }
 
         [TestMethod]
@@ -33,7 +32,6 @@ namespace EntityFramework.Extension.Tests
             var user3 = DemoDbContext.CurrentDb.Database.SqlQuery<User>("select * from Users").ToList().FirstOrDefault();
             //Assert.IsTrue(!string.IsNullOrEmpty(user.Name));
         }
-
 
         /// <summary>
         /// 测试热处理 + 线程数据库
@@ -71,13 +69,58 @@ namespace EntityFramework.Extension.Tests
         public void TestNoLockRead()
         {
             // begin tran ..
-            var nolockList = DemoDbContext.CurrentDb.NoLockFunc(() => DemoDbContext.CurrentDb.Users.ToList());
+            var nolockList = DemoDbContext.CurrentDb.NoLockFunc(db => db.Users.ToList());
             // commit tran ..
             //Assert.IsTrue(list.Count != nolockList.Count);
         }
 
+        /// <summary>
+        /// 普通修改
+        /// </summary>
+        [TestMethod]
+        public void TestUpdate()
+        {
+            // 0.00.247 0.00.261
+            var user = DemoDbContext.CurrentDb.Users.Find(2);
+            user.Name = Guid.NewGuid().ToString();
+            DemoDbContext.CurrentDb.SaveChanges();
+        }
 
+        /// <summary>
+        /// 更新指定列
+        /// </summary>
+        [TestMethod]
+        public void TestUpdateField()
+        {
+            // 0.00.187 0.00.181
+            var user = new User { Id = 2, Name = Guid.NewGuid().ToString() };
+            DemoDbContext.CurrentDb.UpdateField(user, "Name");
+            DemoDbContext.CurrentDb.SaveChanges();
+        }
 
+        /// <summary>
+        /// 当对象存在上下文情况下
+        /// 更新指定列
+        /// </summary>
+        [TestMethod]
+        public void TestUpdateFieldAleady()
+        {
+            var user = DemoDbContext.CurrentDb.Users.Find(2);
+            var user2 = new User { Id = 2, Name = Guid.NewGuid().ToString() };
+            DemoDbContext.CurrentDb.UpdateField(user2, x => x.Id == 2, "Name");
+            DemoDbContext.CurrentDb.SaveChanges();
+        }
 
+        /// <summary>
+        /// 多次查询
+        /// </summary>
+        [TestMethod]
+        public void TestMultiSelect()
+        {
+            for (int i = 0; i < 10000; i++)
+            {
+                var user = DemoDbContext.CurrentDb.Users.AsNoTracking().ToList();
+            }
+        }
     }
 }

@@ -23,6 +23,7 @@ namespace EntityFramework.Extension
         #region ctor
         static BaseDbContext()
         {
+            MasterSlave();
         }
 
         protected BaseDbContext() : this("DefaultConnection")
@@ -54,25 +55,6 @@ namespace EntityFramework.Extension
         }
         #endregion
 
-        #region Thread
-        /// <summary>
-        /// 线程级 缓存 数据库
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static T CurrentDbContext<T>() where T : DbContext, new()
-        {
-            var name = typeof(T).FullName;
-            var db = CallContext.GetData(name) as T;
-            if (db == null)
-            {
-                db = new T();
-                CallContext.SetData(name, db);
-            }
-            return db;
-        }
-        #endregion
-
         #region HandleState
         protected virtual void ApplyConcepts()
         {
@@ -94,16 +76,16 @@ namespace EntityFramework.Extension
                         }
                         continue;
                     default:
-                        HandleSelect(entry);
-                        LogManager.GetLogger(GetType()).Debug(entry);
+                        HandleDefault(entry);
+                        LogManager.GetLogger(GetType()).Debug("HandleDefault" + entry);
                         continue;
                 }
             }
         }
 
-        protected virtual void HandleSelect(DbEntityEntry entry)
+        protected virtual void HandleDefault(DbEntityEntry entry)
         {
-            HandleState.Select(entry);
+            HandleState.Default(entry);
         }
 
         protected virtual void HandleAdd(DbEntityEntry entry)
@@ -163,38 +145,9 @@ namespace EntityFramework.Extension
         /// 主从复制
         /// </summary>
         /// <param name="slavedbConn"></param>
-        protected static void MasterSlave(string slavedbConn)
+        protected static void MasterSlave()
         {
-            DbInterception.Add(new DbMasterSlaveCommandInterceptor(slavedbConn));
-        }
-        #endregion
-
-        #region NoLockFunc
-        /// <summary>
-        /// 事务期间读取 和 修改 可变数据
-        /// 主要用于nolock读取
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="func"></param>
-        /// <returns></returns>
-        public T NoLockFunc<T>(Func<T> func)
-        {
-            var transactionOptions = new System.Transactions.TransactionOptions
-            {
-                IsolationLevel = System.Transactions.IsolationLevel.ReadUncommitted
-            };
-            using (new System.Transactions.TransactionScope(System.Transactions.TransactionScopeOption.Required, transactionOptions))
-            {
-                try
-                {
-                    return func();
-                }
-                catch (Exception ex)
-                {
-                    LogManager.GetLogger(GetType()).Error(ex);
-                    throw;
-                }
-            }
+            DbInterception.Add(new DbMasterSlaveCommandInterceptor());
         }
         #endregion
 

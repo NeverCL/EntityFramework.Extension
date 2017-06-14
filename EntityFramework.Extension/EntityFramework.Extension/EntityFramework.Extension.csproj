@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseDbContext.cs" />
+    <Compile Include="DbContextHelper.cs" />
     <Compile Include="DbMasterSlaveCommandInterceptor.cs" />
     <Compile Include="EntityFrameworkConfig.cs" />
     <Compile Include="HandleState.cs" />
