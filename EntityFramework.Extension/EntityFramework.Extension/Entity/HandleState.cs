@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 
-namespace EntityFramework.Extension
+namespace EntityFramework.Extension.Entity
 {
     /// <summary>
     /// 处理状态
@@ -33,9 +29,9 @@ namespace EntityFramework.Extension
                 entry.State = EntityState.Unchanged;
                 var entity = entry.Entity as ISoftDelete;
                 entity.IsDeleted = true;
-                if (entry.Entity is IDeletionAudited)
+                if (entry.Entity is IDeletionEntity)
                 {
-                    var deletionEntity = entry.Entity as IDeletionAudited;
+                    var deletionEntity = entry.Entity as IDeletionEntity;
                     deletionEntity.DeletionTime = DateTime.Now;
                     deletionEntity.DeleterUserId = GetUserId();
                 }
@@ -44,9 +40,9 @@ namespace EntityFramework.Extension
 
         public static void Modify(DbEntityEntry entry)
         {
-            if (entry.Entity is IModificationAudited)
+            if (entry.Entity is IModifyEntity)
             {
-                var entity = entry.Entity as IModificationAudited;
+                var entity = entry.Entity as IModifyEntity;
                 entity.LastModificationTime = DateTime.Now;
                 entity.LastModifierUserId = GetUserId();
             }
@@ -54,7 +50,7 @@ namespace EntityFramework.Extension
 
         public static void Default(DbEntityEntry entry)
         {
-            
+
         }
 
         private static string GetUserId()

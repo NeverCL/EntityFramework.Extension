@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EntityFramework.Extension
+namespace EntityFramework.Extension.Entity
 {
-    public interface ISoftDelete
+    public interface IAuditionEntity : ICreatorEntity, IModifyEntity
     {
-        bool IsDeleted { get; set; }
+
     }
 }

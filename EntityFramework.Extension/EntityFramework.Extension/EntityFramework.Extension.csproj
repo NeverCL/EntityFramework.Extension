@@ -63,29 +63,26 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseDbContext.cs" />
-    <Compile Include="DbContextHelper.cs" />
-    <Compile Include="DbMasterSlaveCommandInterceptor.cs" />
-    <Compile Include="EntityFrameworkConfig.cs" />
+    <Compile Include="DbContext\DbContextHelper.cs" />
+    <Compile Include="Entity\AuditionEntity.cs" />
+    <Compile Include="Entity\IAuditionEntity.cs" />
+    <Compile Include="Interceptor\DbMasterSlaveCommandInterceptor.cs" />
+    <Compile Include="Config\EntityFrameworkConfig.cs" />
     <Compile Include="Entity\CreatorEntity.cs" />
     <Compile Include="Entity\DeletionEntity.cs" />
     <Compile Include="Entity\ICreatorEntity.cs" />
     <Compile Include="Entity\IDeletionEntity.cs" />
     <Compile Include="Entity\IModifyEntity.cs" />
     <Compile Include="Entity\ModifyEntity.cs" />
-    <Compile Include="HandleState.cs" />
-    <Compile Include="ICreatorEntity.cs" />
-    <Compile Include="IDeletionAudited.cs" />
-    <Compile Include="IModificationAudited.cs" />
-    <Compile Include="ISoftDelete.cs" />
+    <Compile Include="Entity\HandleState.cs" />
+    <Compile Include="Entity\ISoftDelete.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DbContext\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

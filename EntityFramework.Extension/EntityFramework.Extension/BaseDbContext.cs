@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Core.Mapping;
@@ -7,14 +6,11 @@ using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Infrastructure.Interception;
 using System.Data.Entity.Validation;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Security.Claims;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Common.Logging;
-using Microsoft.AspNet.Identity;
+using EntityFramework.Extension.Entity;
+using EntityFramework.Extension.Interceptor;
 
 namespace EntityFramework.Extension
 {
