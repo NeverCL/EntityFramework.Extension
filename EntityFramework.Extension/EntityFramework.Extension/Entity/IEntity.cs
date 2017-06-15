@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace EntityFramework.Extension.Entity
 {
-    public class DeletionEntity : IDeletionEntity
+    public interface IEntity<TPrimaryKey>
     {
-        public DateTime DeletionTime { get; set; }
-        public string DeleterUserId { get; set; }
+        TPrimaryKey Id { get; set; }
     }
 }

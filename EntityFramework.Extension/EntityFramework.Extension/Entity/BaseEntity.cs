@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 
 namespace EntityFramework.Extension.Entity
 {
-    public interface IAuditionEntity : ICreatorEntity, IModifyEntity, IDeletionEntity
+    public class BaseEntity : BaseEntity<long>
     {
+    }
 
+    public class BaseEntity<T> : IEntity<T>
+    {
+        public T Id { get; set; }
     }
 }

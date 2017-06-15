@@ -65,11 +65,12 @@
     <Compile Include="DbContext\BaseDbContext.cs" />
     <Compile Include="DbContext\DbContextHelper.cs" />
     <Compile Include="Entity\AuditionEntity.cs" />
+    <Compile Include="Entity\BaseEntity.cs" />
     <Compile Include="Entity\IAuditionEntity.cs" />
+    <Compile Include="Entity\IEntity.cs" />
     <Compile Include="Interceptor\DbMasterSlaveCommandInterceptor.cs" />
     <Compile Include="Config\EntityFrameworkConfig.cs" />
     <Compile Include="Entity\CreatorEntity.cs" />
-    <Compile Include="Entity\DeletionEntity.cs" />
     <Compile Include="Entity\ICreatorEntity.cs" />
     <Compile Include="Entity\IDeletionEntity.cs" />
     <Compile Include="Entity\IModifyEntity.cs" />
