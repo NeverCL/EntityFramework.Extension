@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Data.Common;
 using System.Data.Entity.Infrastructure.Interception;
 using Common.Logging;
@@ -10,8 +11,16 @@ namespace EntityFramework.Extension.Interceptor
     {
         const string TYPENAME = "DbMasterSlaveCommandInterceptor";
 
-        public DbMasterSlaveCommandInterceptor()
+        private readonly EntityFrameworkConfig _config;
+
+        public DbMasterSlaveCommandInterceptor() : this((EntityFrameworkConfig)ConfigurationManager.GetSection("EntityFrameworkConfig"))
         {
+
+        }
+
+        public DbMasterSlaveCommandInterceptor(EntityFrameworkConfig config)
+        {
+            this._config = config;
             LogManager.GetLogger(TYPENAME).Debug("DbMasterSlaveCommandInterceptor()");
         }
 
@@ -30,7 +39,7 @@ namespace EntityFramework.Extension.Interceptor
         /// <param name="interceptionContext"></param>
         public override void ReaderExecuting(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
         {
-            if (EntityFrameworkConfig.IsSlaveRead && !command.CommandText.StartsWith("insert", StringComparison.CurrentCultureIgnoreCase) && command.Transaction == null)
+            if (_config.IsSlaveRead && !command.CommandText.StartsWith("insert", StringComparison.CurrentCultureIgnoreCase) && command.Transaction == null)
             {
                 ChangeReadConn(command.Connection);
             }
@@ -47,7 +56,7 @@ namespace EntityFramework.Extension.Interceptor
             lock ("IsThreadSlave")
             {
                 commandConnection.Close();
-                commandConnection.ConnectionString = EntityFrameworkConfig.ReadConnstr;
+                commandConnection.ConnectionString = _config.ReadConnstr;
                 commandConnection.Open();
                 #region Thread Connection 
                 //if (EntityFrameworkConfig.IsThreadSlave && slaveDbConnection != null && !string.IsNullOrEmpty(slaveDbConnection.ConnectionString))
@@ -74,7 +83,6 @@ namespace EntityFramework.Extension.Interceptor
 
         /// <summary>
         /// Linq 生成的update,delete + Database.ExecuteSqlCommand
-        /// 
         /// </summary>
         /// <param name="command"></param>
         /// <param name="interceptionContext"></param>
