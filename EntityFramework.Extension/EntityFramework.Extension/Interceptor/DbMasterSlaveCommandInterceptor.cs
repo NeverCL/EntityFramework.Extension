@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Data.Common;
 using System.Data.Entity.Infrastructure.Interception;
+using System.Linq;
 using Common.Logging;
 using EntityFramework.Extension.Config;
 
@@ -9,11 +10,11 @@ namespace EntityFramework.Extension.Interceptor
 {
     public class DbMasterSlaveCommandInterceptor : DbCommandInterceptor
     {
-        const string TYPENAME = "DbMasterSlaveCommandInterceptor";
+        const string Typename = "DbMasterSlaveCommandInterceptor";
 
         private readonly EntityFrameworkConfig _config;
 
-        public DbMasterSlaveCommandInterceptor() : this((EntityFrameworkConfig)ConfigurationManager.GetSection("EntityFrameworkConfig"))
+        public DbMasterSlaveCommandInterceptor() : this((EntityFrameworkConfig)ConfigurationManager.GetSection("entityFrameworkConfig"))
         {
 
         }
@@ -21,15 +22,8 @@ namespace EntityFramework.Extension.Interceptor
         public DbMasterSlaveCommandInterceptor(EntityFrameworkConfig config)
         {
             this._config = config;
-            LogManager.GetLogger(TYPENAME).Debug("DbMasterSlaveCommandInterceptor()");
+            LogManager.GetLogger(Typename).Debug("DbMasterSlaveCommandInterceptor()");
         }
-
-        //private string GetReadDbConnection()
-        //{
-        //    // 由于 存在多个从库的时候，存在心跳检测，权重匹配的问题。可用第三方负载均衡工具实现。
-        //    // 从库没有的情况下，直接取主库
-        //    return !string.IsNullOrEmpty(slavedbConn) ? slavedbConn : _masterIp;
-        //}
 
         /// <summary>
         /// Linq 生成的select,insert + Database.SqlQuery<User>("select * from Users").ToList();
@@ -43,7 +37,7 @@ namespace EntityFramework.Extension.Interceptor
             {
                 ChangeReadConn(command.Connection);
             }
-            LogManager.GetLogger(TYPENAME).Debug(command.CommandText);
+            LogManager.GetLogger(Typename).Debug(command.CommandText);
             base.ReaderExecuting(command, interceptionContext);
         }
 
@@ -56,28 +50,12 @@ namespace EntityFramework.Extension.Interceptor
             lock ("IsThreadSlave")
             {
                 commandConnection.Close();
-                commandConnection.ConnectionString = _config.ReadConnstr;
+                if (_config.ReadConnstr != null)
+                {
+                    commandConnection.ConnectionString = _config.ReadConnstr;
+                }
+                // todo 权重算法取连接
                 commandConnection.Open();
-                #region Thread Connection 
-                //if (EntityFrameworkConfig.IsThreadSlave && slaveDbConnection != null && !string.IsNullOrEmpty(slaveDbConnection.ConnectionString))
-                //{
-                //    if (slaveDbConnection.State == ConnectionState.Closed)
-                //    {
-                //        slaveDbConnection.Open();
-                //    }
-                //    commandConnection = slaveDbConnection;
-                //}
-                //else
-                //{
-                //    commandConnection.Close();
-                //    commandConnection.ConnectionString = EntityFrameworkConfig.ReadConnstr;
-                //    commandConnection.Open();
-                //    if (EntityFrameworkConfig.IsThreadSlave && slaveDbConnection == null)
-                //    {
-                //        slaveDbConnection = commandConnection;
-                //    }
-                //} 
-                #endregion
             }
         }
 
@@ -88,7 +66,7 @@ namespace EntityFramework.Extension.Interceptor
         /// <param name="interceptionContext"></param>
         public override void NonQueryExecuting(DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
         {
-            LogManager.GetLogger(TYPENAME).Debug(command.CommandText);
+            LogManager.GetLogger(Typename).Debug(command.CommandText);
             base.NonQueryExecuting(command, interceptionContext);
         }
 
@@ -99,7 +77,7 @@ namespace EntityFramework.Extension.Interceptor
         /// <param name="interceptionContext"></param>
         public override void ScalarExecuting(DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
         {
-            LogManager.GetLogger(TYPENAME).Debug(command.CommandText);
+            LogManager.GetLogger(Typename).Debug(command.CommandText);
             base.ScalarExecuting(command, interceptionContext);
         }
 

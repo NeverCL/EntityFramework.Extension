@@ -140,7 +140,6 @@ namespace EntityFramework.Extension
         /// <summary>
         /// 主从复制
         /// </summary>
-        /// <param name="slavedbConn"></param>
         protected static void MasterSlave()
         {
             DbInterception.Add(new DbMasterSlaveCommandInterceptor());

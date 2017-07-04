@@ -13,6 +13,7 @@ namespace EntityFramework.Extension.Tests
             InitData();
         }
 
+        [TestMethod]
         public void InitData()
         {
             //var db = new DemoDbContext();
