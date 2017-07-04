@@ -22,7 +22,6 @@ namespace EntityFramework.Extension.Tests
             //    Name = "name"
             //});
             //db.SaveChanges();
-            var db = DemoDbContext.CurrentDb.Users.ToList();
         }
 
         [TestMethod]

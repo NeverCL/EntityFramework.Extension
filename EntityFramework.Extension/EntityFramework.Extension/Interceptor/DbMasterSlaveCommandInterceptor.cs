@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Common;
 using System.Data.Entity.Infrastructure.Interception;
+using System.Diagnostics;
 using System.Linq;
 using Common.Logging;
 using EntityFramework.Extension.Config;
@@ -13,6 +15,12 @@ namespace EntityFramework.Extension.Interceptor
         const string Typename = "DbMasterSlaveCommandInterceptor";
 
         private readonly EntityFrameworkConfig _config;
+
+        #region weight
+        private List<string> _listWeight;
+        private int maxWeight = -1;
+        #endregion
+
 
         public DbMasterSlaveCommandInterceptor() : this((EntityFrameworkConfig)ConfigurationManager.GetSection("entityFrameworkConfig"))
         {
@@ -50,13 +58,42 @@ namespace EntityFramework.Extension.Interceptor
             lock ("IsThreadSlave")
             {
                 commandConnection.Close();
-                if (_config.ReadConnstr != null)
+                if (!string.IsNullOrEmpty(_config.ReadConnstr))
                 {
                     commandConnection.ConnectionString = _config.ReadConnstr;
                 }
-                // todo 权重算法取连接
+                else
+                {
+                    commandConnection.ConnectionString = GetWeightConnectString(_config.ReaderConnections);
+                }
                 commandConnection.Open();
             }
+        }
+
+        /// <summary>
+        /// 获取权重连接
+        /// </summary>
+        /// <param name="configReaderConnections"></param>
+        /// <returns></returns>
+        private string GetWeightConnectString(ReaderConnectionCollection configReaderConnections)
+        {
+            if (maxWeight == -1)
+            {
+                maxWeight = 0;
+                _listWeight = new List<string>();
+                foreach (ReaderConnection configReaderConnection in configReaderConnections)
+                {
+                    maxWeight += configReaderConnection.Weight;
+                    for (int i = 0; i < configReaderConnection.Weight; i++)
+                    {
+                        _listWeight.Add(configReaderConnection.Name);
+                    }
+                }
+            }
+            var value = new Random().Next(maxWeight);
+            var key = _listWeight[value];
+            var connectionString = configReaderConnections[key].ConnectionString;
+            return connectionString;
         }
 
         /// <summary>

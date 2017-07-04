@@ -22,18 +22,12 @@ namespace EntityFramework.Extension.Config
         /// <summary>
         /// 从库连接字符串
         /// </summary>
-        [ConfigurationProperty("ReadConnstr", DefaultValue = "")]
+        [ConfigurationProperty("ReadConnstr")]
         public string ReadConnstr
         {
             get
             {
                 return (string)this["ReadConnstr"];
-                //var conn = this.ReadConnstr;
-                //if (string.IsNullOrEmpty(conn))
-                //{
-                //    //conn = ReaderConnections["0"].ConnectionString;
-                //}
-                //return conn;
             }
             set { this["ReadConnstr"] = value; }
         }
@@ -78,21 +72,21 @@ namespace EntityFramework.Extension.Config
 
     public class ReaderConnection : ConfigurationElement
     {
-        [ConfigurationProperty("name", DefaultValue = "")]
+        [ConfigurationProperty("name")]
         public string Name
         {
             get { return (string)this["name"]; }
             set { this["name"] = value; }
         }
 
-        [ConfigurationProperty("connectionString", DefaultValue = "")]
+        [ConfigurationProperty("connectionString")]
         public string ConnectionString
         {
             get { return (string)this["connectionString"]; }
             set { this["connectionString"] = value; }
         }
 
-        [ConfigurationProperty("providerName", DefaultValue = "")]
+        [ConfigurationProperty("providerName", DefaultValue = "System.Data.SqlClient")]
         public string ProviderName
         {
             get { return (string)this["providerName"]; }
