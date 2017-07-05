@@ -162,12 +162,12 @@ namespace EntityFramework.Extension
 
         #region TransExecute
         /// <summary>
-        /// 事务执行
+        /// 如果存在环境事务，直接取环境事务，如果不存在，则创建新的事务执行
+        /// 省略事务提交步骤
         /// </summary>
-        public static T TransExecute<T, TDbContext>(this TDbContext dbContext, Func<TDbContext, T> func, TransactionOptions transactionOptions) where TDbContext : DbContext
+        public static T TransExecute<T, TDbContext>(this TDbContext dbContext, Func<TDbContext, T> func, TransactionScopeOption transactionScopeOption = TransactionScopeOption.Required) where TDbContext : DbContext
         {
-            using (var trans = new TransactionScope(TransactionScopeOption.Required,
-                    transactionOptions))
+            using (var trans = new TransactionScope(transactionScopeOption))
             {
                 var rst = func(dbContext);
                 trans.Complete();
