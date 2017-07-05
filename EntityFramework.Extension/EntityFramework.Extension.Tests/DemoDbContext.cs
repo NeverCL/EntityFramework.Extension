@@ -1,4 +1,5 @@
 ﻿using System.Data.Entity;
+using EntityFramework.Extension.Entity;
 
 namespace EntityFramework.Extension.Tests
 {
@@ -17,9 +18,8 @@ namespace EntityFramework.Extension.Tests
         public IDbSet<User> Users { get; set; }
     }
 
-    public class User
+    public class User : BaseEntity
     {
-        public long Id { get; set; }
 
         public string Name { get; set; }
     }

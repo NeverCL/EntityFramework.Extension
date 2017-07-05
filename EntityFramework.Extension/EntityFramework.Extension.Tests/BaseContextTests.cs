@@ -107,6 +107,7 @@ namespace EntityFramework.Extension.Tests
         {
             var user = DemoDbContext.CurrentDb.Users.Find(2);
             var user2 = new User { Id = 2, Name = Guid.NewGuid().ToString() };
+            DemoDbContext.CurrentDb.UpdateEntityField(user2, "Name");
             DemoDbContext.CurrentDb.UpdateField(user2, x => x.Id == 2, "Name");
             DemoDbContext.CurrentDb.SaveChanges();
         }

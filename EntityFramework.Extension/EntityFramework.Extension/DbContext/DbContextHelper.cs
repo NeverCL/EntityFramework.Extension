@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Transactions;
 using Common.Logging;
+using EntityFramework.Extension.Entity;
 
 namespace EntityFramework.Extension
 {
@@ -61,6 +62,26 @@ namespace EntityFramework.Extension
             foreach (var propertyName in propertyNames)
             {
                 setEntry.SetModifiedProperty(propertyName);
+            }
+        }
+
+        public static void UpdateEntityField<TPrimaryKey, TDbContext>(this TDbContext dbContext, IEntity<TPrimaryKey> entity, params string[] propertyNames) 
+            where TDbContext : DbContext, new()
+        {
+            var db = CurrentDbContext<TDbContext>();
+            db.Entry(entity).State = EntityState.Detached;
+            var type = entity.GetType();
+            var attachedEntity = db.Set(type).Find(entity.Id);
+            if (attachedEntity != null)
+            {
+                // 对象存在上下文中
+                var attachedEntry = db.Entry(attachedEntity);
+                attachedEntry.CurrentValues.SetValues(entity);
+            }
+            else
+            {
+                // 对象不存在上下文中
+                UpdateField(dbContext, entity, propertyNames);
             }
         }
         #endregion
