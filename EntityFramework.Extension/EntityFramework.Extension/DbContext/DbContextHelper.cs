@@ -65,6 +65,14 @@ namespace EntityFramework.Extension
             }
         }
 
+        /// <summary>
+        /// 更新指定字段
+        /// </summary>
+        /// <typeparam name="TPrimaryKey"></typeparam>
+        /// <typeparam name="TDbContext"></typeparam>
+        /// <param name="dbContext"></param>
+        /// <param name="entity">实现 IEntity《TPrimaryKey》的实体</param>
+        /// <param name="propertyNames"></param>
         public static void UpdateEntityField<TPrimaryKey, TDbContext>(this TDbContext dbContext, IEntity<TPrimaryKey> entity, params string[] propertyNames) 
             where TDbContext : DbContext, new()
         {
