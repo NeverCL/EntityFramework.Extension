@@ -12,24 +12,24 @@ namespace EntityFramework.Extension.Config
         /// <summary>
         /// 从库读开关
         /// </summary>
-        [ConfigurationProperty("IsSlaveRead", DefaultValue = "false")]
+        [ConfigurationProperty("isSlaveRead", DefaultValue = "false")]
         public bool IsSlaveRead
         {
-            get { return (bool)this["IsSlaveRead"]; }
-            set { this["IsSlaveRead"] = value; }
+            get { return (bool)this["isSlaveRead"]; }
+            set { this["isSlaveRead"] = value; }
         }
 
         /// <summary>
         /// 从库连接字符串
         /// </summary>
-        [ConfigurationProperty("ReadConnstr")]
+        [ConfigurationProperty("readConnstr")]
         public string ReadConnstr
         {
             get
             {
-                return (string)this["ReadConnstr"];
+                return (string)this["readConnstr"];
             }
-            set { this["ReadConnstr"] = value; }
+            set { this["readConnstr"] = value; }
         }
 
         /// <summary>
