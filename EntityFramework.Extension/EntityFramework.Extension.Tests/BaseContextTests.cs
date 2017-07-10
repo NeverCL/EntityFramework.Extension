@@ -16,12 +16,24 @@ namespace EntityFramework.Extension.Tests
         [TestMethod]
         public void InitData()
         {
+            //DemoDbContext.CurrentDb.GenerateViews();
             //var db = new DemoDbContext();
             //db.Users.Add(new User
             //{
             //    Name = "name"
             //});
             //db.SaveChanges();
+        }
+
+        [TestMethod]
+        public void TestSelectAndUpdate()
+        {
+            using (var trans = DemoDbContext.CurrentDb.Database.BeginTransaction())
+            {
+                var user = DemoDbContext.CurrentDb.Users.Find(1);
+                user.Name = Guid.NewGuid().ToString();
+                DemoDbContext.CurrentDb.SaveChanges();
+            }
         }
 
         [TestMethod]
