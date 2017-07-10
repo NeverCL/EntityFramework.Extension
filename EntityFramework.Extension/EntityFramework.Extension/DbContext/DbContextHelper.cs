@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Core.Mapping;
 using System.Data.Entity.Core.Metadata.Edm;
@@ -9,6 +10,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Transactions;
 using Common.Logging;
 using EntityFramework.Extension.Entity;
+using IsolationLevel = System.Transactions.IsolationLevel;
 
 namespace EntityFramework.Extension
 {
@@ -73,7 +75,7 @@ namespace EntityFramework.Extension
         /// <param name="dbContext"></param>
         /// <param name="entity">实现 IEntity《TPrimaryKey》的实体</param>
         /// <param name="propertyNames"></param>
-        public static void UpdateEntityField<TPrimaryKey, TDbContext>(this TDbContext dbContext, IEntity<TPrimaryKey> entity, params string[] propertyNames) 
+        public static void UpdateEntityField<TPrimaryKey, TDbContext>(this TDbContext dbContext, IEntity<TPrimaryKey> entity, params string[] propertyNames)
             where TDbContext : DbContext, new()
         {
             var db = CurrentDbContext<TDbContext>();
@@ -120,12 +122,9 @@ namespace EntityFramework.Extension
         /// <param name="db"></param>
         public static void GenerateViews(this DbContext db)
         {
-            using (db)
-            {
-                var objectContext = ((IObjectContextAdapter)db).ObjectContext;
-                var mappingCollection = (StorageMappingItemCollection)objectContext.MetadataWorkspace.GetItemCollection(DataSpace.CSSpace);
-                mappingCollection.GenerateViews(new List<EdmSchemaError>());
-            }
+            var objectContext = ((IObjectContextAdapter)db).ObjectContext;
+            var mappingCollection = (StorageMappingItemCollection)objectContext.MetadataWorkspace.GetItemCollection(DataSpace.CSSpace);
+            mappingCollection.GenerateViews(new List<EdmSchemaError>());
         }
         #endregion
 

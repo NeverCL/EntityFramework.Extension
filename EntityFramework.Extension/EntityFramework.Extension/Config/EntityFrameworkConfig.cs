@@ -10,6 +10,16 @@ namespace EntityFramework.Extension.Config
     public sealed class EntityFrameworkConfig : ConfigurationSection
     {
         /// <summary>
+        /// 主库连接字符串配置名
+        /// </summary>
+        [ConfigurationProperty("MasterConnName", DefaultValue = "DefaultConnection")]
+        public string MasterConnName
+        {
+            get { return this["MasterConnName"].ToString(); }
+            set { this["MasterConnName"] = value; }
+        }
+
+        /// <summary>
         /// 从库读开关
         /// </summary>
         [ConfigurationProperty("isSlaveRead", DefaultValue = "false")]

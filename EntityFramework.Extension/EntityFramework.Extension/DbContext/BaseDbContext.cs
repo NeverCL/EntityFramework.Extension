@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Core.Mapping;
@@ -103,8 +104,16 @@ namespace EntityFramework.Extension
         #region SaveChanges
         public override int SaveChanges()
         {
-            ApplyConcepts();
-            return base.SaveChanges();
+            try
+            {
+                ApplyConcepts();
+                return base.SaveChanges();
+            }
+            catch (DbEntityValidationException ex)
+            {
+                LogDbEntityValidationException(ex);
+                throw;
+            }
         }
 
         public override Task<int> SaveChangesAsync()
