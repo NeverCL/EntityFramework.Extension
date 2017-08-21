@@ -12,11 +12,11 @@ namespace EntityFramework.Extension.Config
         /// <summary>
         /// 主库连接字符串配置名
         /// </summary>
-        [ConfigurationProperty("MasterConnName", DefaultValue = "DefaultConnection")]
+        [ConfigurationProperty("masterConnName", DefaultValue = "DefaultConnection")]
         public string MasterConnName
         {
-            get { return this["MasterConnName"].ToString(); }
-            set { this["MasterConnName"] = value; }
+            get { return this["masterConnName"].ToString(); }
+            set { this["masterConnName"] = value; }
         }
 
         /// <summary>
