@@ -20,7 +20,7 @@ namespace EntityFramework.Extension
         #region ctor
         static BaseDbContext()
         {
-            MasterSlave();
+            //MasterSlave();
         }
 
         protected BaseDbContext() : this("DefaultConnection")

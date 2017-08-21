@@ -8,7 +8,7 @@ namespace EntityFramework.Extension.Entity
 {
     public interface IModifyEntity
     {
-        DateTime LastModificationTime { get; set; }
+        DateTime? LastModificationTime { get; set; }
 
         string LastModifierUserId { get; set; }
     }

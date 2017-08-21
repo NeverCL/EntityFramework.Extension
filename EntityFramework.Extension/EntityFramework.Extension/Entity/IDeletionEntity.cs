@@ -8,7 +8,7 @@ namespace EntityFramework.Extension.Entity
 {
     public interface IDeletionEntity : ISoftDelete
     {
-        DateTime DeletionTime { get; set; }
+        DateTime? DeletionTime { get; set; }
 
         string DeleterUserId { get; set; }
     }
